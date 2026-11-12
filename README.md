@@ -1,7 +1,7 @@
-# Dashboard Pasar Live
+# Lembar Pasar (Dashboard Pasar Live)
 
-Dashboard React yang berwarna untuk harga crypto, saham US, saham IDX, dan portofolio,
-dengan data live dari konektor **Pluang** milik pengunjung (read-only).
+Dashboard sederhana: **total aset** dari akun Pluang + **analisis per aset** (grafik dengan support/resistance,
+analisis teknikal, fundamental dari laporan keuangan). Data live dari konektor **Pluang** milik pengunjung (read-only).
 
 Live: https://claude.ai/artifact/9r7u6ZdsbRauyYWtNhsBsM
 
@@ -9,30 +9,37 @@ Live: https://claude.ai/artifact/9r7u6ZdsbRauyYWtNhsBsM
 
 ```
 src/
-  main.jsx     titik masuk React
-  App.jsx      semua komponen: Portfolio, PriceChart, CryptoCard, StockCard
+  App.jsx      Portfolio (total aset) + Analysis (PriceChart, Technicals, Fundamentals)
   mcp.js       jembatan ke konektor Pluang (useWatch hook, pesan error)
   format.js    format Rupiah, Dolar, persen, tanggal
-  styles.css   tema terang/gelap + palet warna per kelas aset
+  logos.js     logo koin & saham (data URI, hasil dev/fetch_logos.py)
+  styles.css   gaya "koran keuangan": kertas + tinta, tema terang/gelap
 template.html  kerangka HTML
-build.mjs      bundel semuanya jadi satu file dist/index.html (esbuild)
+build.mjs      bundel jadi satu file dist/index.html
+dev/serve.mjs  pratinjau live-reload dengan data contoh (dev/mock.js)
+previews/      tangkapan layar
 ```
 
 ## Menjalankan
 
 ```bash
 npm install
-npm run build
+npm run dev     # pratinjau di http://localhost:5173, otomatis reload, data contoh
+npm run build   # hasil akhir: dist/index.html
 ```
 
-Hasilnya `dist/index.html`. Data live hanya muncul saat halaman dibuka sebagai artifact
-di claude.ai dengan konektor Pluang tersambung. Tanpa itu, halaman menampilkan pesan
-untuk menyambungkan Pluang.
+Data asli hanya muncul saat halaman dibuka sebagai artifact di claude.ai dengan Pluang tersambung.
+Artifact ini memakai tool Pluang: portfolio_get_holdings/wallet_balance/buying_power,
+*_get_ohlc, *_get_technicals, us/indo_stocks_get_fundamentals.
 
-## Warna
+## Logo
 
-Warna per kelas aset diambil dari palet kategorikal yang sudah divalidasi aman untuk buta warna,
-dengan urutan tetap: Crypto `--c1` (biru), Saham US `--c2` (oranye), Saham IDX `--c3` (tosca),
-USDT & lainnya `--c4` (kuning).
+Crypto: `cryptocurrency-icons` (CC0). Saham US: `nvstly/icons` (tanpa lisensi tercantum).
+ETF Invesco memakai logo penerbit; ETF lain dan saham IDX memakai lencana/inisial.
+Perbarui dengan `python3 dev/fetch_logos.py <folder paket cryptocurrency-icons>`.
+
+## Belum diterbitkan
+
+Commit terakhir (logo ETF QQQ/SMH) belum dipublikasikan ke link live.
 
 Bukan saran investasi.
