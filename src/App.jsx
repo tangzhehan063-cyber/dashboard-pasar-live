@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useConn, useWatch, connect, refreshAll, errorCopy, store } from "./mcp.js";
+import LOGOS from "./logos.js";
 import { idr, idrShort, usd, pct, qty, isoDaysAgo, dateShort } from "./format.js";
 
 // Identity colour per asset class — fixed order from the validated categorical palette.
@@ -24,9 +25,16 @@ function Delta({ now, base, value, suffix }) {
     </span>
   );
 }
-const Avatar = ({ cls, text }) => (
-  <span className="avatar" style={{ "--c": `var(${CLS[cls].var})` }} aria-hidden="true">{text.slice(0, 4)}</span>
-);
+const logoOf = (cls, sym) => LOGOS[(cls === "cryptocurrency" ? "c:" : cls === "global_equity" ? "s:" : "x:") + sym];
+function Avatar({ cls, text }) {
+  const src = logoOf(cls, text);
+  const [bad, setBad] = useState(false);
+  return (
+    <span className={"avatar " + (src && !bad ? "has-logo " + (cls === "cryptocurrency" ? "coin" : "co") : "mono-av")} style={{ "--c": `var(${CLS[cls].var})` }} aria-hidden="true">
+      {src && !bad ? <img src={src} alt="" loading="lazy" onError={() => setBad(true)} /> : text.replace(/[^A-Z0-9]/g, "").slice(0, 2)}
+    </span>
+  );
+}
 const ErrorNote = ({ error }) => (error ? <div className="err"><b>!</b> {errorCopy(error)}</div> : null);
 function Card({ cls, no, title, right, children, className = "", id }) {
   return (
@@ -339,7 +347,7 @@ export default function App() {
         </div>
       </header>
       {tape.length > 0 && <div className="tape mono" aria-label="Harga crypto terkini">
-        <div className="tape-in">{[0, 1].map((k) => <span key={k} aria-hidden={k === 1}>{tape.map((r) => <span key={r.symbol} className="tk"><b>{r.symbol}</b> {idrShort(r.midPrice)}</span>)}</span>)}</div>
+        <div className="tape-in">{[0, 1].map((k) => <span key={k} aria-hidden={k === 1}>{tape.map((r) => <span key={r.symbol} className="tk">{logoOf("cryptocurrency", r.symbol) && <img className="tk-logo" src={logoOf("cryptocurrency", r.symbol)} alt="" />}<b>{r.symbol}</b> {idrShort(r.midPrice)}</span>)}</span>)}</div>
       </div>}
 
       {conn.status === "unavailable" && <div className="banner">Data live butuh konektor <b>Pluang</b>. Buka halaman ini di claude.ai dengan akun yang sudah menyambungkan Pluang.</div>}
