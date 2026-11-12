@@ -26,12 +26,15 @@ function Delta({ now, base, value, suffix }) {
   );
 }
 const logoOf = (cls, sym) => LOGOS[(cls === "cryptocurrency" ? "c:" : cls === "global_equity" ? "s:" : "x:") + sym];
-function Avatar({ cls, text }) {
+const ETFS = new Set("SPY VOO IVV VTI QQQ QQQM SMH SOXX SOXL TQQQ SQQQ DIA IWM ARKK SCHD VGT XLK XLF XLE XLV GLD SLV TLT VEA VWO EEM EFA RSP SPLV PSQ".split(" "));
+function Avatar({ cls, text, etf }) {
+  if (!etf && cls === "global_equity" && ETFS.has(text)) etf = true;
   const src = logoOf(cls, text);
   const [bad, setBad] = useState(false);
   return (
-    <span className={"avatar " + (src && !bad ? "has-logo " + (cls === "cryptocurrency" ? "coin" : "co") : "mono-av")} style={{ "--c": `var(${CLS[cls].var})` }} aria-hidden="true">
-      {src && !bad ? <img src={src} alt="" loading="lazy" onError={() => setBad(true)} /> : text.replace(/[^A-Z0-9]/g, "").slice(0, 2)}
+    <span className={"avatar " + (src && !bad ? "has-logo " + (cls === "cryptocurrency" ? "coin" : "co") : etf ? "etf-av" : "mono-av")} style={{ "--c": `var(${CLS[cls].var})` }} aria-hidden="true">
+      {src && !bad ? <img src={src} alt="" loading="lazy" onError={() => setBad(true)} /> : text.replace(/[^A-Z0-9]/g, "").slice(0, etf ? 4 : 2)}
+      {etf && <b className="etf-tag">ETF</b>}
     </span>
   );
 }
@@ -93,7 +96,7 @@ function Portfolio({ masked, setMasked, onPick, picked }) {
       if (cat.totalCount > items.length) partial.push(`${CLS[cat.assetCategory]?.label || cat.title}: ${items.length} dari ${cat.totalCount}`);
       items.forEach((it) => {
         const ti = it.tileInfo || {}, vp = (it.display && it.display.valueAndProfit) || {}, m = vp.meta || {};
-        rows.push({ cls: cat.assetCategory, sym: ti.displaySymbol || ti.symbol || "?", name: ti.name || "", qty: vp.totalQuantity, ...m });
+        rows.push({ cls: cat.assetCategory, sym: ti.displaySymbol || ti.symbol || "?", name: ti.name || "", etf: ti.securityType === "ETF", qty: vp.totalQuantity, ...m });
         const idrVal = m.currency === "USD" ? (rate ? m.value * rate : null) : m.value;
         if (idrVal != null) sums[cat.assetCategory] = (sums[cat.assetCategory] || 0) + idrVal;
       });
@@ -151,7 +154,7 @@ function Portfolio({ masked, setMasked, onPick, picked }) {
             const money = r.currency === "USD" ? usd : idr;
             return (
               <tr key={r.cls + r.sym} className={"pick" + (picked && picked.sym === r.sym && picked.cls === r.cls ? " sel" : "")} tabIndex={0} style={{ "--c": `var(${CLS[r.cls]?.var || "--c1"})` }} onClick={() => CLS[r.cls] && onPick({ cls: r.cls, sym: r.sym })} onKeyDown={(e) => e.key === "Enter" && CLS[r.cls] && onPick({ cls: r.cls, sym: r.sym })}>
-                <td><div className="assetcell"><Avatar cls={r.cls} text={r.sym} /><div className="nm"><b>{r.sym}</b><div className="muted small"><span className="chip" style={{ "--c": `var(${CLS[r.cls]?.var || "--c1"})` }}>{CLS[r.cls]?.label || r.cls}</span> {r.name}</div></div></div></td>
+                <td><div className="assetcell"><Avatar cls={r.cls} text={r.sym} etf={r.etf} /><div className="nm"><b>{r.sym}</b><div className="muted small"><span className="chip" style={{ "--c": `var(${CLS[r.cls]?.var || "--c1"})` }}>{CLS[r.cls]?.label || r.cls}</span> {r.name}</div></div></div></td>
                 <td className="r mono secret hide-sm">{qty(r.qty)}{r.cls === "indo_stock" ? " lbr" : ""}</td>
                 <td className="r mono secret">{money(r.value)}</td>
                 <td className="r secret"><Delta value={r.profitValuePercentage} suffix={`${r.profitValue < 0 ? "−" : "+"}${money(Math.abs(r.profitValue)).replace("−", "")} (${pct(r.profitValuePercentage)})`} /></td>

@@ -24,7 +24,7 @@ function pay(tool,inp){
  if(tool==="portfolio_get_holdings"){const it=(sym,name,q,v,c,pnl)=>({tileInfo:{displaySymbol:sym,name},display:{valueAndProfit:{totalQuantity:q,meta:{value:v,currency:c,profitValue:pnl,profitValuePercentage:pnl/v*100}}}});
   return{data:{reportedTotals:{netAssetValueIdr:48000000,unrealisedPnlIdr:3100000},assetCategories:[
   {assetCategory:"cryptocurrency",title:"Crypto",totalCount:2,assetCategoryData:[it("BTC","Bitcoin",0.012,20000000,"IDR",2100000),it("ETH","Ethereum",0.1,6000000,"IDR",-300000)]},
-  {assetCategory:"global_equity",title:"US",totalCount:1,assetCategoryData:[it("AAPL","Apple Inc.",3,700,"USD",40)]},
+  {assetCategory:"global_equity",title:"US",totalCount:2,assetCategoryData:[it("QQQ","Nasdaq100 ETF",0.33,226.26,"USD",-21.93),it("SMH","VanEck Semiconductor ETF",0.23,114.7,"USD",4.66)]},
   {assetCategory:"indo_stock",title:"IDX",totalCount:1,assetCategoryData:[it("BBCA","Bank Central Asia",5,4800000,"IDR",200000)]}]}}}
  return{};}
 const mcp={callTool:async(s,t,i)=>({payload:pay(t,i)}),invalidate:async()=>{},watchTool:(s,t,i,cb)=>{setTimeout(()=>cb({type:"data",result:{payload:pay(t,i)}}),50);return()=>{}}};
